@@ -1,0 +1,307 @@
+# Atom16 - 20
+
+## 16 객체는 모든 곳에 존재한다
+### 객체를 정의하는 용어
+- 클래스: 프로퍼티와 함수를 정의한다.
+- 맴버: 클래스에 속한 프로퍼티나  함수. 클래스에 속하는 모든 것을 의미.
+- 맴버 함수: 특정 클래스에 속한 객체가 있어야만 사용될 수 있는 함수. 클래스의 동작을 정의하며 클래스의 **메서드** 용어와 거의 동일하게 사용(그러나 코틀린은 함수라는 표현을 사용)
+- 객체 생성: 인스턴스를 생성하는 것
+
+```kotlin
+fun main() {
+  val r = IntRange(0, 10)
+  println(r.sum())  // 여기서 IntRange 클래스의 맴버함수인 sum을 호출할 수 있다
+}
+```
+
+## 17 클래스 만들기
+
+### 클래스를 만들어보자
+```kotlin
+class Giraffe
+class Bear
+class Hippo
+
+fun main() {
+  val g1 = Giraffe()
+  val g2 = Giraffe()
+  val b = Bear()
+  val h = Hippo()
+  println(g1)
+  println(g2)
+  println(b)
+  println(h)
+}
+
+
+# 출력 결과
+Giraffe@28d93b30
+Giraffe@1b6d3589
+Bear@dkd123d3
+Hippo@74a14482
+```
+
+- 클래스 본문 안에 정의된 함수는 해당 클래스에 속한다. 코틀린에서 이런 함수를 클래스의 **맴버 함수** 라고 하는데 자바같은 객체 지향 언어에서는 맴버 함수를 메서드 라고 부르기도 한다. 이건 스몰토크 같은 초기 객체 지향 언어에서 비롯된 용어다.
+- 코틀린 설계자들은 **메서드**라는 용어를 채택하지 않고 `함수`라는 표현을 사용하는데 이는 __코틀린의 함수적인 특성을 강조하기 위해서임__
+
+```kotlin
+class Dog {
+  fun bark() = "야!!"
+}
+
+fun main() {
+  val dog = Dog()
+  println(dog.bark())
+}
+```
+
+- 맴버 함수: 클래스에 속함 함수
+- 최상위 함수: 클래스에 속하지 않은 함수
+
+### 맴버 함수 호출
+맴버 함수는 클래스에 속한 다른 요소들을 객체를 지정하지 않고 맴버 이름만 사용하는 특별한 방법으로 접근할 수 있다. `this` 를 사용할 수도 있음. 하지만 `this`를 반드시 적어야 하는 경우가 아니라면 불필요한 `this`사용은 코드를 읽는 사람에게 왜 이런 식으로 작성했는지 고민하게끔 할 수 있으므로 사용하지 않는 것이 좋다.
+```kotlin
+class Hamster {
+  fun speak() = "Squeak! "
+  fun exercise() =
+    this.speak() + // this 로 한정
+    speak() +      // this 없이 호출
+    "Running on wheel"
+}
+
+fun main() {
+  val ham = hamster()
+  println(hamster.exercise())
+}
+
+
+# 출력
+Squeak! Squeak! Running on wheel
+```
+
+## 18 프로퍼티
+
+> 프로퍼티는 클래스에 속한 var나 val이다
+
+프로퍼티를 정의함으로써 클래스 안에서 상태를 유지한다.
+```kotlin
+class Cup2 {  
+  var percentFull = 0  
+  val max = 100  
+  fun add(increase: Int): Int {  
+    percentFull += increase  
+    if (percentFull > max)  
+      percentFull = max  
+    return percentFull  
+  }  
+}  
+  
+fun main() {  
+  val cup = Cup2()  
+  cup.add(50)  
+  println(cup.percentFull)  
+  cup.add(70)  
+  println(cup.percentFull)  
+}  
+/* Output:  
+50  
+100  
+*/
+```
+
+- 클래스 안에 정의한 `var`, `val` 은 클래스의 일부가 되며 점표기법으로 값에 접근할 수 있다
+- 프로퍼티는 자신의 속한 객체 인스턴스의 상태를 표시
+- 맴버함수 내에서 이름만으로 프로퍼티에 접근 가능(add 맴버 함수에서 percentFull, max)
+
+```kotlin
+class House {  
+  var sofa: String = ""  
+}
+class Sofa {  
+  val cover: String = "Loveseat cover"  
+}
+class Kitchen {  
+  var table: String = "Round table"  
+}
+
+val house = House()
+house.sofa = "Simple sleeper sofa: $89.00"  
+house.sofa = "New leather sofa: $3,099.00"  // ??
+
+var sofa = Sofa()
+sofa.cover = "New cover"  // ??
+```
+- house.sofa는 변경이 되나?
+- sofa.cover 는?
+
+```kotlin
+
+fun main() {  
+  val kitchen1 = Kitchen()  
+  val kitchen2 = kitchen1  
+  println("kitchen1: ${kitchen1.table}")  
+  println("kitchen2: ${kitchen2.table}")  
+  kitchen1.table = "Square table"  
+  println("kitchen1: ${kitchen1.table}")  
+  println("kitchen2: ${kitchen2.table}")  
+}
+
+/* Output:  
+kitchen1: Round table  
+kitchen2: Round table  
+kitchen1: Square table  
+kitchen2: Square table  
+*/
+
+```
+- 위의 kitchen1, kitchen2의 var, val은 객체가 아니라 참조이다
+- 객체에서의 가변성은 내부 상태를 바꿀 수 있느냐 없느냐다. 즉 House, Kitchen은 가변객체, Sofa는 불변객체를 정의한다고 볼 수 있음
+
+
+## 19 생성자
+
+> 생성자는 정보를 전달해 새 객체를 초기화하는 특별함 맴버 함수와 비슷하다
+
+```kotlin
+class Alien(name: String) {  
+  val greeting = "Poor $name!"  
+}  
+  
+fun main() {  
+  val alien = Alien("Mr. Meeseeks")  
+  println(alien.greeting)  
+  alien.name  // 이건 오류남
+}
+```
+- name은 생성자 안에서 greeting을 초기화 하지만 밖에선 접근 불가능. 오류 남
+
+```kotlin
+class AlienSpecies(  
+  val name: String,  
+  val eyes: Int,  
+  val hands: Int,  
+  val legs: Int  
+) {  
+  fun describe() =  
+    "$name with $eyes eyes, " +  
+      "$hands hands and $legs legs"}  
+  
+fun main() {  
+  val kevin =  
+    AlienSpecies("Zigerion", 2, 2, 2)  
+  val mortyJr =  
+    AlienSpecies("Gazorpian", 2, 6, 2)  
+  println(kevin.describe())  
+  println(mortyJr.describe())  
+}  
+/* Output:  
+Zigerion with 2 eyes, 2 hands and 2 legs  
+Gazorpian with 2 eyes, 6 hands and 2 legs  
+*/
+```
+- 생성자 파라미터 목록에서 `var`, `val`로 정의하면 해당 식별자가 프로퍼티로 바귀어서 생성자 밖에서도 접근이 가능하게 된다.
+
+그리고 `println`에 객체를 전달받으면 객체의 `toString()`을 호출하는데 이걸 기본값이 아닌 다른 걸로 바꿀 수도 있다.
+
+```kotlin
+class Scientist(val name: String) {  
+  override fun toString(): String {  
+    return "Scientist('$name')"  
+  }  
+}  
+  
+fun main() {  
+  val zeep = Scientist("Zeep Xanflorp")  
+  println(zeep)  
+}
+```
+- `override`라는 키워드로 이미 정의된 맴버함수를 변경 할 수 있다. 이렇게 하는 이유는 의도치 않게 같은 이름의 함수를 정의하는 등의 실수를 방지하기 위해서임. 인간의 실수를 하니까.
+
+## 20 가시성 제한하기
+
+> 소프트웨어를 설계할 때는 변화해야 하는 요소와 동일하게 유지되어야 하는 요소를 분리해야 한다
+
+가시성 제어를 위해 보통 **접근 변경자**를 사용한다. 접근 변경자의 종류에는
+- `public`
+- `private`
+- `protected`
+- `internal`
+등이 있다.
+
+변경자는 클래스, 함수, 프로퍼티 정의 앞에 온다.
+
+`private`정의는 숨겨져 있다. 이 정의가 드러나는 경우는 몇가지가 있다.
+- 같은 클래스에 속한 맴버들만 접근 가능.
+- `private` 클래스, 최상위 함수, 최상위 프로퍼티는 그 정의가 들어있는 __파일 내부 에서만__ 접근 가능
+
+변경자를 지정하지 않으면 정의한 대상은 `public`이 된다. 불필요한 중복을 줄이기 위해 `public`을 사용하지 않는게 좋으나 의도를 명확히 드러내기 위해 써야하는 경우도 있음
+
+```kotlin
+class Cookie(  
+  private var isReady: Boolean  // [1]  
+) {  
+  private fun crumble() =       // [2]  
+    println("crumble")  
+  
+  public fun bite() =           // [3]  
+    println("bite")  
+  
+  fun eat() {                   // [4]  
+    isReady = true              // [5]  
+    crumble()  
+    bite()  
+  }  
+}  
+  
+fun main() {  
+  val x = Cookie(false)  
+  x.bite()
+  x.eat()
+  // Can't access private members:  
+  // x.isReady  // x.crumble() 
+}  
+/* Output:  
+bite  
+crumble  
+bite  
+*/
+```
+- `private` 키워드는 같은 클래스 맴버 외에는 접근 불가(`.isReady`, `.crumble`)
+- 도우미 함수로 쓰이는 맴버 함수를 `private`으로 선언하면 클래스 외부에서 이 함수를 실수로 쓰는 실수를 방지할 수 있음. 같은 클래스 내부에서만 참조하므로 맘대로 변경 가능
+- 내부 구현을 노출시켜야하는 경우를 제외하고는 클래스 내의 프로퍼티는 보통 `private`으로 만든다.
+
+하지만 `private`으로 클래스 내부에 정의한다해도 그 참조가 가리키는 객체에 대한 `public` 참조가 없다고 보장 할 수는 없음
+```kotlin
+class Counter(var start: Int) {  
+  fun increment() {  
+    start += 1  
+  }  
+  override fun toString() = start.toString()  
+}  
+  
+class CounterHolder(counter: Counter) {  
+  private val ctr = counter  
+  override fun toString() =  
+    "CounterHolder: " + ctr  
+}  
+  
+fun main() {  
+  val c = Counter(11)                 // [1]  
+  val ch = CounterHolder(c)           // [2]  
+  println(ch)  
+  c.increment()                       // [3]  
+  println(ch)  
+  val ch2 = CounterHolder(Counter(9)) // [4]  
+  println(ch2)  
+}  
+/* Output:  
+CounterHolder: 11  
+CounterHolder: 12  
+CounterHolder: 9  
+*/
+```
+- [1]에서 c가 Counter(11) 객체를 참조하고 있어서 CounterHolder의 counter가 `private`으로 인식되어도 외부 참조인 c에서 변경이 가능.
+
+### internal
+코드 기반상에서 논리적으로 독립적인 각 부분을 **모듈**이라고 하는데 `internal` 정의는 그 정의가 포함된 모듈 내부에서만 접근 가능.
+`private`과 `public`의 중간쯤 되는 위치임.
